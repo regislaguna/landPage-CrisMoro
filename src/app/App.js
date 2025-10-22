@@ -11,6 +11,7 @@ import Servicos from "../pages/Servicos";
 import Painel from "../pages/Painel";
 import Login from "../pages/Login";
 import PrivateRoute from "../components/Auth";
+import Questionario from "../components/Questionário";
 
 
 function App() {
@@ -25,6 +26,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/sobre" element={<Sobre />} />
             <Route path="/agendamento" element={<Agendamento />} />
+            <Route path="/questionario-personalizado" element={<Questionario />} />
             <Route path="/servicos" element={<Servicos />} />
             <Route path="/painel" element={ 
               <PrivateRoute>
@@ -35,7 +37,7 @@ function App() {
             <Route path="/servicos" element={<Servicos />} />
           </Routes>
         </main>
-        <Footer />
+       
         
       </div>
     </BrowserRouter>
