@@ -1,93 +1,70 @@
-# 🏥 Projeto Clínica de Estética (Frontend)
+# Getting Started with Create React App
 
-Este repositório contém o código-fonte do **Frontend** para a aplicação web da Clínica de Estética Cris Moro. O projeto foi desenvolvido em React e Tailwind CSS, focado em uma experiência de usuário moderna, acessível (a11y) e em um painel administrativo completo para gestão de conteúdo.
+This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-A aplicação é dividida em duas partes principais:
-1.  **Site Público:** A vitrine da clínica para pacientes, com páginas de serviços, agendamento e um questionário personalizado.
-2.  **Painel Administrativo:** Uma área privada (protegida por login) onde o administrador pode gerir o conteúdo do site, como adicionar ou editar serviços.
+## Available Scripts
 
-![Screenshot da Homepage do projeto](caminho/para/sua/imagem.png)
+In the project directory, you can run:
 
----
+### `npm start`
 
-## 🚀 Funcionalidades
+Runs the app in the development mode.\
+Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 
-### 👩‍💻 Site Público (Cliente)
+The page will reload when you make changes.\
+You may also see any lint errors in the console.
 
-* **Homepage:** Apresentação principal com um carrossel de ecrã inteiro (Swiper.js) destacando os serviços e o espaço.
-* **Página de Serviços:** Carrega dinamicamente os serviços a partir da API, com descrições e imagens (layout texto/imagem alternado).
-* **Página Sobre:** Apresenta a história e os valores da clínica.
-* **Página de Agendamento:** Formulário para agendamento rápido de serviços.
-* **Questionário Personalizado:** Um formulário complexo de múltiplas secções para que a clínica possa avaliar o paciente antes da consulta.
-* **Acessibilidade (a11y):** Foco em semântica HTML (landmarks), navegação por teclado (anéis de foco) e compatibilidade com leitores de tela (atributos ARIA).
-* **Design Responsivo:** Totalmente adaptável a dispositivos móveis e tablets.
+### `npm test`
 
-### 🔐 Painel Administrativo (Admin)
+Launches the test runner in the interactive watch mode.\
+See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
 
-* **Autenticação:** Página de login que se comunica com a API para autenticar o administrador (preparada para tokens JWT).
-* **Rotas Protegidas:** O painel (`/painel`) só é acessível após o login.
-* **Dashboard (CRUD de Serviços):**
-    * **Visualizar (Read):** Lista todos os serviços cadastrados numa tabela.
-    * **Criar (Create):** Abre um modal para adicionar um novo serviço (título, descrição, preço, imagem).
-    * **Atualizar (Update):** Permite editar um serviço existente no mesmo modal.
-    * **Excluir (Delete):** Permite excluir um serviço, com confirmação.
+### `npm run build`
 
----
+Builds the app for production to the `build` folder.\
+It correctly bundles React in production mode and optimizes the build for the best performance.
 
-## 🛠️ Tecnologias Utilizadas
+The build is minified and the filenames include the hashes.\
+Your app is ready to be deployed!
 
-* **React.js:** Biblioteca principal para a construção da interface.
-* **Tailwind CSS:** Framework CSS utility-first para estilização rápida e responsiva.
-* **React Router (v6):** Para gestão das rotas da aplicação (públicas e privadas).
-* **Swiper.js:** Para o carrossel interativo da homepage.
-* **Axios:** (ou `fetch`) Para realizar as chamadas HTTP para a API.
-* **React Icons:** Para iconografia.
-* **ESLint:** Para garantir a qualidade e padronização do código.
+See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
 
----
+### `npm run eject`
 
-## ⚙️ Instalação e Execução (Desenvolvimento)
+**Note: this is a one-way operation. Once you `eject`, you can't go back!**
 
-Para executar este projeto localmente, siga os passos abaixo:
+If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
 
-1.  **Clone o repositório:**
-    ```bash
-    git clone [URL_DO_SEU_REPOSITORIO_AQUI]
-    ```
+Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
 
-2.  **Navegue até a pasta do projeto:**
-    ```bash
-    cd landPage-CrisMoro
-    ```
+You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
 
-3.  **Instale as dependências:**
-    ```bash
-    npm install
-    ```
+## Learn More
 
-4.  **Execute a aplicação:**
-    ```bash
-    npm start
-    ```
+You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
 
-5.  Abra o seu navegador e acesse `http://localhost:3000`.
+To learn React, check out the [React documentation](https://reactjs.org/).
 
----
+### Code Splitting
 
-## 🔗 Conexão com o Backend (API)
+This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
 
-Este projeto é **apenas o frontend** da aplicação. Para que as funcionalidades de login, agendamento, questionário e o CRUD de serviços funcionem, é necessário um **backend (API)** a correr simultaneamente.
+### Analyzing the Bundle Size
 
-* A configuração da URL base da API pode ser encontrada em `src/services/api.js`.
-* O frontend espera que a API forneça as seguintes rotas principais:
-    * `POST /login` (Para autenticação)
-    * `GET /servicos` (Para listar os serviços)
-    * `POST /servicos` (Para criar um novo serviço)
-    * `PUT /servicos/:id` (Para atualizar um serviço)
-    * `DELETE /servicos/:id` (Para excluir um serviço)
-    * `POST /agendamentos` (Para receber dados do formulário)
-    * `POST /questionario` (Para receber dados do questionário)
+This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
 
----
+### Making a Progressive Web App
 
-## 📁 Estrutura de Pastas (Simplificada)
+This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+
+### Advanced Configuration
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+
+### Deployment
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+
+### `npm run build` fails to minify
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
