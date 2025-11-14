@@ -1,82 +1,145 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { isAuthenticated, logout } from "../../utils/storege";
+import { Link, useLocation } from "react-router-dom";
+import logoImage from "../../img/Logo empresa.png";
 
 const Header = () => {
-    const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const location = useLocation();
 
-    const toggleMenu = () => {
-        setIsMenuOpen(!isMenuOpen);
-    }
+  const isActive = (path) => location.pathname === path;
 
-  const navigate = useNavigate();
-
-    return(
-        <header className="flex flex-col w-full h-[100px] bg-transparent absolute top-0 z-10">
-            <nav className="h-full flex px-10 mx-auto max-w-[1281px] w-full lg:flex-row flex-col ">
-                <div className="Logo-Area flex-1 flex items-center justify-center px-10">
-                    <h1 className="lg:text-6xl mb:text-2xl text-color-primary font-bold uppercase tracking-[6px]">
-                        Cris Moro
-                    </h1>
-                </div>
-                <div className="Menu-Area flex-1 w-full flex items-center">
-                    <button className="sm:hidden focus:outline-none cursor-pointer" onClick={toggleMenu}>
-                        <svg
-                            className="h-6 w-6 fill-current text-gray-700"
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 24 24"
-                            >
-                            <path d="M0 3h24v2H0V3zm0 6h24v2H0V9zm0 6h24v2H0v-2z"/>
-                        </svg>  
-                    </button>
-                    <ul className=" gap-14 justify-center w-full lg:text-[1.1rem] hidden sm:flex">
-                        <li className="border-b-4 border-gray-70 hover:border-color-third">
-                            <a href="#quem-somos">Quem somos</a>
-                        </li>
-                        <li className="border-b-4 border-gray-70 hover:border-color-third">
-                        <Link to="/servicos">Servicos</Link>
-                        </li>
-                        <li className="border-b-4 border-gray-70 hover:border-color-third">
-                            <a href="/agendamento">Agendamento</a>
-                        </li>
-                        <li className="border-b-4 border-gray-70 hover:border-color-third">
-                          <Link to="/cadastro">Cadastro</Link>
-                        </li>
-                    </ul>
-                </div>
-                {isAuthenticated()&&
-                  <div className="flex justify-center items-center">
-                    <button className=" bg-color-primary text-white font-bold p-3 rounded-[8px]" onClick={() => {logout(); navigate('/login')}}>Logout</button>
-                  </div>
-                }
-            </nav>
-            {/* menu lateral mobile */}
-            <div
-        className={`w-[33%] h-screen absolute top-0 left-0 bg-white opacity-90 flex flex-col justify-center items-center space-y-6 md:hidden ${
-          isMenuOpen ? 'block' : 'hidden'
-        }`}
+  return (
+    <header className="relative w-full z-50 bg-accent-light shadow-md">
+      <nav
+        className="container mx-auto flex justify-between items-center px-4 py-4 md:px-0"
+        aria-label="Navegação principal"
       >
-        <button
-          className="absolute top-0 right-0 m-8 focus:outline-none"
-          onClick={toggleMenu}
-        >
-          <svg
-            className="h-6 w-6 fill-current text-gray-700"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
+        {/* Logo */}
+        <div className="flex-shrink-0">
+          <Link to="/" aria-label="Página inicial">
+            <img
+              src={logoImage}
+              className="w-[120px] h-[120px] rounded-full object-cover"
+              alt="Logo Cris Moro"
+            />
+          </Link>
+        </div>
+
+        {/* Menu Desktop */}
+        <ul className="hidden md:flex space-x-8 items-center">
+          {[
+            { path: "/", label: "Home" },
+            { path: "/sobre", label: "Sobre" },
+            { path: "/servicos", label: "Serviços" },
+          ].map((item) => (
+            <li key={item.path}>
+              <Link
+                to={item.path}
+                aria-current={isActive(item.path) ? "page" : undefined}
+                className={`text-lg font-extrabold uppercase tracking-wide transition-colors duration-300 ${
+                  isActive(item.path)
+                    ? "text-accent-dark border-b-2 border-accent-dark"
+                    : "text-text-dark hover:text-text-medium"
+                }`}
+              >
+                {item.label}
+              </Link>
+            </li>
+          ))}
+
+          {/* Botão de ação destacado */}
+          <li>
+            <Link
+              to="/agendamento"
+              className="ml-6 px-5 py-2 bg-accent-dark text-white rounded-full font-bold uppercase 
+                         transition duration-300 hover:bg-accent-light hover:text-text-dark shadow-md"
+            >
+              Agende Agora
+            </Link>
+          </li>
+        </ul>
+
+        {/* Botão Mobile */}
+        <div className="md:hidden">
+          <button
+            className="text-text-dark focus:outline-none"
+            aria-label="Abrir menu de navegação"
+            aria-expanded={isMobileMenuOpen}
+            aria-controls="mobile-menu"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >
-            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-          </svg>
-        </button>
-        <ul className="space-y-6 text-xl text-dark-gray-primary font-raleway">
-          <li className="border-b-4 border-gray-70 hover:border-color-third"><a href="#quem-somos">Quem somos</a></li>
-          <li className="border-b-4 border-gray-70 hover:border-color-third"><a href="#solucoes">Soluções</a></li>
-          <li className="border-b-4 border-gray-70 hover:border-color-third"><a href="#contato">Contato</a></li>
-          <li className="border-b-4 border-gray-70 hover:border-color-third"><Link to="/suporte">Suporte</Link></li>
+            <svg
+              className="w-7 h-7"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              {isMobileMenuOpen ? (
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              ) : (
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
+              )}
+            </svg>
+          </button>
+        </div>
+      </nav>
+
+      {/* Menu Mobile */}
+      <div
+        id="mobile-menu"
+        className={`md:hidden transform transition-transform duration-300 ease-in-out ${
+          isMobileMenuOpen
+            ? "translate-y-0 opacity-100"
+            : "-translate-y-5 opacity-0 pointer-events-none"
+        } bg-accent-light absolute w-full left-0 shadow-lg`}
+      >
+        <ul className="flex flex-col items-center space-y-4 py-6">
+          {[
+            { path: "/", label: "Home" },
+            { path: "/sobre", label: "Sobre" },
+            { path: "/servicos", label: "Serviços" },
+          ].map((item) => (
+            <li key={item.path}>
+              <Link
+                to={item.path}
+                aria-current={isActive(item.path) ? "page" : undefined}
+                onClick={() => setIsMobileMenuOpen(false)}
+                className={`text-lg font-extrabold uppercase tracking-wide transition-colors duration-300 ${
+                  isActive(item.path)
+                    ? "text-accent-dark border-b-2 border-accent-dark"
+                    : "text-text-dark hover:text-text-medium"
+                }`}
+              >
+                {item.label}
+              </Link>
+            </li>
+          ))}
+
+          {/* Botão de ação destacado no mobile */}
+          <li>
+            <Link
+              to="/agendamento"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="px-6 py-2 bg-accent-dark text-white rounded-full font-bold uppercase 
+                         transition duration-300 hover:bg-accent-light hover:text-text-dark shadow-md"
+            >
+              Agende Agora
+            </Link>
+          </li>
         </ul>
       </div>
-        </header>
-    )
-}
+    </header>
+  );
+};
 
 export default Header;

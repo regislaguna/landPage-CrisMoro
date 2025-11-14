@@ -1,25 +1,8 @@
-// src/pages/AgendamentosPage.jsx
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // Importe useNavigate
-import Header from '../components/Header/index';
-import Footer from '../components/Footer/index';
-
-
-// ... (servicosDisponiveis e horariosDisponiveis permanecem os mesmos) ...
-const servicosDisponiveis = [
-    { id: 1, title: 'Limpeza de Pele Profunda', duration: 60, price: 'R$ 150,00' },
-    { id: 2, title: 'Drenagem Linfática Corporal', duration: 90, price: 'R$ 180,00' },
-    { id: 3, title: 'Peeling Químico', duration: 45, price: 'R$ 250,00' },
-    { id: 4, title: 'Massagem Relaxante', duration: 60, price: 'R$ 120,00' },
-    { id: 5, title: 'Design de Sobrancelhas', duration: 30, price: 'R$ 50,00' },
-];
-
-const horariosDisponiveis = [
-    '09:00', '10:00', '11:00', '14:00', '15:00', '16:00', '17:00'
-];
+import React, { useState, useEffect } from 'react';
+import api from '../services/api';
+import { Link, useLocation } from 'react-router-dom';
 
 function Agendamentos() {
-  const navigate = useNavigate(); // Hook para navegação programática
   const [formData, setFormData] = useState({
     serviceId: '',
     date: '',
@@ -29,110 +12,171 @@ function Agendamentos() {
     email: '',
     notes: ''
   });
-  const [message, setMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState(null);
+
+  // Lista de serviços
+  const [servicos, setServicos] = useState([]);
+  const [loadingServicos, setLoadingServicos] = useState(true);
+
+  // Captura parâmetro da URL (ex: ?servico=1)
+  const location = useLocation();
+
+  useEffect(() => {
+    async function fetchServicos() {
+      try {
+        setLoadingServicos(true);
+        const response = await api.get('/servicos');
+        setServicos(response.data);
+
+        // Pré-seleção via URL
+        const params = new URLSearchParams(location.search);
+        const servicoParam = params.get("servico");
+        if (servicoParam) {
+          setFormData(prev => ({ ...prev, serviceId: servicoParam }));
+        }
+      } catch (err) {
+        console.error("Erro ao buscar serviços:", err);
+      } finally {
+        setLoadingServicos(false);
+      }
+    }
+    fetchServicos();
+  }, [location.search]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Dados do agendamento:', formData);
-    setMessage('Agendamento solicitado com sucesso! Aguarde a confirmação.');
-    setFormData({
-      serviceId: '',
-      date: '',
-      time: '',
-      name: '',
-      phone: '',
-      email: '',
-      notes: ''
-    });
-  };
+    setIsLoading(true);
+    setError(null);
+    setSuccess(false);
 
-  const handlePersonalizedClick = () => {
-    navigate('/questionario-personalizado'); // Navega para a nova página do questionário
+    try {
+      // ✅ Endpoint corrigido para plural e payload compatível
+      await api.post('/agendamentos', {
+        serviceId: formData.serviceId,
+        date: formData.date,
+        time: formData.time,
+        name: formData.name,
+        phone: formData.phone,
+        email: formData.email,
+        notes: formData.notes
+      });
+      setIsLoading(false);
+      setSuccess(true);
+      setFormData({ serviceId: '', date: '', time: '', name: '', phone: '', email: '', notes: '' });
+    } catch (err) {
+      setIsLoading(false);
+      setError('Erro ao agendar. Tente novamente.');
+    }
   };
-
-  const today = new Date().toISOString().split('T')[0];
 
   return (
-    <div className="agendamentos-page-container bg-gray-100 min-h-screen">
-     
+    <main className="bg-bg-light py-16">
+      <div className="container mx-auto px-4">
+        <h1 className="text-4xl font-extrabold text-center text-accent-dark mb-12 animate-fadeSlide">
+          Agende Seu Horário
+        </h1>
 
-      <main className="container mx-auto px-4 py-8">
-        <h1 className="text-4xl font-extrabold text-center text-purple-800 mb-12">Agende Seu Horário ou Peça um Atendimento Personalizado</h1>
+        <form
+          onSubmit={handleSubmit}
+          className="bg-white p-8 rounded-lg shadow-lg max-w-2xl mx-auto animate-fadeSlide"
+        >
+          {/* Nome */}
+          <div className="mb-4">
+            <label htmlFor="name" className="block text-sm font-medium text-text-dark mb-1">Nome *</label>
+            <input id="name" type="text" name="name" value={formData.name} onChange={handleChange} required className="w-full border rounded-md p-2"/>
+          </div>
 
-        {/* Seção de Agendamento Tradicional */}
-        <div className="mb-12">
-            <h2 className="text-3xl font-bold text-center text-gray-700 mb-8">Agendamento Rápido</h2>
-            <form onSubmit={handleSubmit} className="bg-white p-8 rounded-lg shadow-lg max-w-2xl mx-auto">
-                {/* Campos do formulário de agendamento permanecem aqui */}
-                <div className="mb-6">
-                    <label htmlFor="serviceId" className="block text-gray-700 text-sm font-bold mb-2">Serviço Desejado:</label>
-                    <select id="serviceId" name="serviceId" value={formData.serviceId} onChange={handleChange} required className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                        <option value="">Selecione um serviço</option>
-                        {servicosDisponiveis.map(service => (
-                            <option key={service.id} value={service.id}>{service.title} ({service.duration} min) - {service.price}</option>
-                        ))}
-                    </select>
-                </div>
-                <div className="mb-6">
-                    <label htmlFor="date" className="block text-gray-700 text-sm font-bold mb-2">Data:</label>
-                    <input type="date" id="date" name="date" value={formData.date} onChange={handleChange} min={today} required className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"/>
-                </div>
-                <div className="mb-6">
-                    <label htmlFor="time" className="block text-gray-700 text-sm font-bold mb-2">Horário:</label>
-                    <select id="time" name="time" value={formData.time} onChange={handleChange} required className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                        <option value="">Selecione um horário</option>
-                        {horariosDisponiveis.map((timeOption, index) => (
-                            <option key={index} value={timeOption}>{timeOption}</option>
-                        ))}
-                    </select>
-                </div>
-                <div className="mb-6">
-                    <label htmlFor="name" className="block text-gray-700 text-sm font-bold mb-2">Seu Nome Completo:</label>
-                    <input type="text" id="name" name="name" value={formData.name} onChange={handleChange} required className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"/>
-                </div>
-                <div className="mb-6">
-                    <label htmlFor="phone" className="block text-gray-700 text-sm font-bold mb-2">Telefone (com DDD):</label>
-                    <input type="tel" id="phone" name="phone" value={formData.phone} onChange={handleChange} required pattern="[0-9]{10,11}" placeholder="Ex: 11987654321" className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"/>
-                </div>
-                <div className="mb-6">
-                    <label htmlFor="email" className="block text-gray-700 text-sm font-bold mb-2">E-mail:</label>
-                    <input type="email" id="email" name="email" value={formData.email} onChange={handleChange} required className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"/>
-                </div>
-                <div className="mb-6">
-                    <label htmlFor="notes" className="block text-gray-700 text-sm font-bold mb-2">Observações (opcional):</label>
-                    <textarea id="notes" name="notes" value={formData.notes} onChange={handleChange} rows="4" className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"></textarea>
-                </div>
+          {/* Email */}
+          <div className="mb-4">
+            <label htmlFor="email" className="block text-sm font-medium text-text-dark mb-1">Email *</label>
+            <input id="email" type="email" name="email" value={formData.email} onChange={handleChange} required className="w-full border rounded-md p-2"/>
+          </div>
 
-                <div className="flex items-center justify-center">
-                    <button type="submit" className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-full focus:outline-none focus:shadow-outline transition duration-300">
-                        Confirmar Agendamento
-                    </button>
-                </div>
-                {message && (<p className="text-center mt-4 text-green-600 font-semibold">{message}</p>)}
-            </form>
-        </div>
+          {/* Telefone */}
+          <div className="mb-4">
+            <label htmlFor="phone" className="block text-sm font-medium text-text-dark mb-1">Telefone *</label>
+            <input id="phone" type="tel" name="phone" value={formData.phone} onChange={handleChange} required className="w-full border rounded-md p-2"/>
+          </div>
 
-        {/* Seção de Atendimento Personalizado */}
-        <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white p-8 rounded-lg shadow-xl max-w-2xl mx-auto text-center mt-12 mb-12">
-            <h2 className="text-3xl font-bold mb-4">Não tem certeza de qual serviço escolher?</h2>
-            <p className="text-lg mb-6">Responda algumas perguntas e nós te ajudaremos a encontrar o tratamento ideal para suas necessidades e objetivos. Receba uma recomendação personalizada de Cris Moro.</p>
-            <button
-                onClick={handlePersonalizedClick}
-                className="bg-white text-purple-700 font-bold py-3 px-8 rounded-full shadow-lg hover:bg-gray-100 transition duration-300 transform hover:scale-105"
-            >
-                Iniciar Questionário Personalizado
-            </button>
-        </div>
+          {/* Data e Horário */}
+          <div className="mb-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="date" className="block text-sm font-medium text-text-dark mb-1">Data *</label>
+              <input id="date" type="date" name="date" value={formData.date} onChange={handleChange} required className="w-full border rounded-md p-2"/>
+            </div>
+            <div>
+              <label htmlFor="time" className="block text-sm font-medium text-text-dark mb-1">Horário *</label>
+              <input id="time" type="time" name="time" value={formData.time} onChange={handleChange} required className="w-full border rounded-md p-2"/>
+            </div>
+          </div>
 
-      </main>
+          {/* Serviço */}
+          <div className="mb-4">
+            <label htmlFor="serviceId" className="block text-sm font-medium text-text-dark mb-1">Serviço *</label>
+            {loadingServicos ? (
+              <p>Carregando serviços...</p>
+            ) : (
+              <select
+                id="serviceId"
+                name="serviceId"
+                value={formData.serviceId}
+                onChange={handleChange}
+                required
+                className="w-full border rounded-md p-2"
+              >
+                <option value="">Selecione um serviço</option>
+                {servicos.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.nome}
+                  </option>
+                ))}
+              </select>
+            )}
+          </div>
 
-      <Footer />
-    </div>
+          {/* Feedback */}
+          {error && <p className="text-red-600 mb-4">{error}</p>}
+          {success && <p className="text-green-600 mb-4">Agendamento realizado com sucesso!</p>}
+
+          {/* Botão */}
+          <button
+            type="submit"
+            className="text-white bg-accent-dark border rounded-xl uppercase font-bold 
+                       min-h-[40px] w-full transition-all duration-300 ease-in-out
+                       hover:bg-accent-light hover:text-text-dark 
+                       hover:shadow-lg hover:-translate-y-1
+                       disabled:bg-gray-400 disabled:cursor-not-allowed"
+            disabled={isLoading}
+          >
+            {isLoading ? 'Agendando...' : 'Agendar'}
+          </button>
+        </form>
+
+        {/* Questionário personalizado */}
+        <section
+          className="bg-gradient-to-r from-purple-500 to-pink-500 text-white p-8 rounded-lg shadow-xl 
+                     max-w-2xl mx-auto text-center mt-12 mb-12 animate-fadeSlide"
+          aria-label="Questionário para atendimento personalizado"
+        >
+          <h2 className="text-2xl font-bold mb-4">Questionário Personalizado</h2>
+          <p className="mb-4">Preencha nosso questionário para que possamos oferecer um atendimento mais direcionado.</p>
+          <Link
+            to="/questionario"
+            className="inline-block bg-white text-accent-dark font-bold px-6 py-2 rounded-lg 
+                       transition duration-300 ease-in-out hover:bg-accent-light hover:text-text-dark"
+          >
+            Ir para o Questionário
+          </Link>
+        </section>
+      </div>
+    </main>
   );
 }
 
