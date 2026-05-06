@@ -1,0 +1,34 @@
+/* src/index.css */
+
+/* ... suas importações @tailwind ... */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* --- Personalização do Swiper.js --- */
+/* Muda a cor das setas e dos pontinhos para o nosso 'accent-dark' */
+
+.swiper-button-next,
+.swiper-button-prev {
+  color: #B76E79 !important; /* Cor accent-dark */
+  transition: all 0.3s ease;
+}
+
+.swiper-button-next:hover,
+.swiper-button-prev:hover {
+  color: #D4A5A5 !important; /* Cor accent-light */
+}
+
+.swiper-pagination-bullet {
+  background: rgba(255, 255, 255, 0.7) !important;
+  width: 10px !important;
+  height: 10px !important;
+  opacity: 1 !important;
+  transition: all 0.3s ease;
+}
+
+.swiper-pagination-bullet-active {
+  background: #B76E79 !important; /* Cor accent-dark */
+  width: 12px !important;
+  height: 12px !important;
+}

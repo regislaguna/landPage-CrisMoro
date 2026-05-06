@@ -1,62 +1,90 @@
-import { Link } from "react-router-dom";
-// ICONES E FIGURAS
-import { FaSpotify, FaFacebook, FaInstagram, FaYoutube } from "react-icons/fa";
-import { FaSquareXTwitter } from "react-icons/fa6";
+import React from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faInstagram, faFacebookF, faPinterestP, faWhatsapp } from '@fortawesome/free-brands-svg-icons';
 
+const Footer = () => {
+  return (
+    <footer id="contact" className="bg-text-dark text-gray-300 pt-12 pb-6 relative">
+      <div className="container mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-10">
+        
+        {/* SOBRE */}
+        <div>
+          <h3 className="text-lg font-bold text-white mb-4">SOBRE</h3>
+          <p className="text-sm leading-relaxed">
+            Na <span className="font-semibold text-white">CRIS MORO</span>, acreditamos que a verdadeira beleza vem de dentro para fora. Nosso objetivo é realçar sua confiança e elegância natural.
+          </p>
+          <div className="flex gap-4 mt-4">
+            <a href="https://www.instagram.com/esteticacrismoro?igsh=aWx0MTA4em9zaGxo " aria-label="Instagram" className="text-gray-400 hover:text-accent-light text-xl">
+              <FontAwesomeIcon icon={faInstagram} />
+            </a>
+            <a href="#" aria-label="Facebook" className="text-gray-400 hover:text-accent-light text-xl">
+              <FontAwesomeIcon icon={faFacebookF} />
+            </a>
+            <a href="#" aria-label="Pinterest" className="text-gray-400 hover:text-accent-light text-xl">
+              <FontAwesomeIcon icon={faPinterestP} />
+            </a>
+          </div>
+        </div>
 
-//import '../Footer/index.css'
+        {/* SERVIÇOS */}
+        <div>
+          <h3 className="text-lg font-bold text-white mb-4">SERVIÇOS</h3>
+          <ul className="space-y-2 text-sm">
+            <li><a href="#" className="hover:text-accent-light transition">Limpeza de Pele</a></li>
+            <li><a href="#" className="hover:text-accent-light transition">Drenagem</a></li>
+            <li><a href="#" className="hover:text-accent-light transition">Peeling</a></li>
+            <li><a href="#" className="hover:text-accent-light transition">Massagem</a></li>
+          </ul>
+        </div>
 
-function Footer() {
-    return (
-        /*
-          AQUI ESTÁ A MUDANÇA:
-          - Adicionamos 'border-t' para criar uma borda apenas no topo.
-                */
-        // A linha separadora já está aqui: 'border-t' (borda no topo)
-        <footer className="flex w-full color-fundo text-center font-lato text-gray-800 border-t border-gray-200">
-            <div className="container mx-auto px-4 py-6 flex flex-col items-center">
+        {/* INFORMAÇÕES */}
+        <div>
+          <h3 className="text-lg font-bold text-white mb-4">INFORMAÇÕES</h3>
+          <ul className="space-y-2 text-sm">
+            <li><a href="#" className="hover:text-accent-light transition">FAQ</a></li>
+            <li><a href="#" className="hover:text-accent-light transition">Política de Privacidade</a></li>
+            <li><a href="#" className="hover:text-accent-light transition">Termos de Serviço</a></li>
+            <li><a href="#" className="hover:text-accent-light transition">Blog</a></li>
+          </ul>
+        </div>
 
-                <div className="mb-4">
-                    <h3 className="justify-center text-2xl mb-2 font-bold text-[#634234] text-center">
-                        Clinica de Estética Cris Moro
-                    </h3>
-                    <p className="text-gray-700">
-                        Mais que estética, um ato de amor-próprio. ❤️
-                    </p>
-                </div>
+        {/* NEWSLETTER */}
+        <div>
+          <h3 className="text-lg font-bold text-white mb-4">NEWSLETTER</h3>
+          <p className="text-sm mb-4">Receba dicas de beleza e promoções exclusivas:</p>
+          <form className="flex flex-col gap-3">
+            <input
+              type="email"
+              placeholder="Seu e-mail"
+              className="px-4 py-2 rounded bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-accent-light"
+            />
+            <button
+              type="submit"
+              className="px-4 py-2 bg-accent-dark text-white rounded hover:bg-accent-light transition"
+            >
+              Inscrever-se
+            </button>
+          </form>
+        </div>
+      </div>
 
-                <div className="flex flex-wrap gap-3 justify-center items-center mt-4">
-                    <a href="#" target="_blank" rel="noopener noreferrer" aria-label="Spotify"
-                        className="w-10 h-10 flex items-center justify-center rounded-full bg-[#634234] text-white hover:bg-[#1DB954] transition-colors duration-300">
-                        <FaSpotify className="text-xl" />
-                    </a>
-                    <a href="#" target="_blank" rel="noopener noreferrer" aria-label="Facebook"
-                        className="w-10 h-10 flex items-center justify-center rounded-full bg-[#634234] text-white hover:bg-[#1877F2] transition-colors duration-300">
-                        <FaFacebook className="text-xl" />
-                    </a>
-                    <a href="#" target="_blank" rel="noopener noreferrer" aria-label="Instagram"
-                        className="w-10 h-10 flex items-center justify-center rounded-full bg-[#634234] text-white hover:bg-gradient-to-br from-[#405DE6] via-[#C13584] to-[#FD1D1D] transition-all duration-300">
-                        <FaInstagram className="text-xl" />
-                    </a>
-                    <a href="#" target="_blank" rel="noopener noreferrer" aria-label="YouTube"
-                        className="w-10 h-10 flex items-center justify-center rounded-full bg-[#634234] text-white hover:bg-[#FF0000] transition-colors duration-300">
-                        <FaYoutube className="text-xl" />
-                    </a>
-                    <a href="#" target="_blank" rel="noopener noreferrer" aria-label="Twitter"
-                        className="w-10 h-10 flex items-center justify-center rounded-full bg-[#634234] text-white hover:bg-black transition-colors duration-300">
-                        <FaSquareXTwitter className="text-xl" />
-                    </a>
-                </div>
-                
-                <div className="mt-5 pt-4 border-t border-gray-200 w-full max-w-screen-md">
-                    <p className="text-sm text-gray-500">
-                        &copy; 2025 Clinica de Estética Cris Moro. Todos os direitos reservados.
-                    </p>
-                </div>
+      {/* Separador */}
+      <div className="border-t border-gray-700 mt-10 pt-6 text-center text-sm text-gray-500">
+        &copy; {new Date().getFullYear()} <span className="text-white font-semibold">CRIS MORO</span>. Todos os direitos reservados.
+      </div>
 
-            </div>
-        </footer>
-    )
-}
+      {/* Botão WhatsApp fixo */}
+      <a
+        href="https://wa.me/5511997404121"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed bottom-6 right-6 bg-green-500 hover:bg-green-600 text-white p-4 rounded-full shadow-lg z-50 transition"
+        aria-label="Fale conosco pelo WhatsApp"
+      >
+        <FontAwesomeIcon icon={faWhatsapp} className="text-2xl" />
+      </a>
+    </footer>
+  );
+};
 
 export default Footer;

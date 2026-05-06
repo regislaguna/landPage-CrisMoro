@@ -1,56 +1,94 @@
 import { useState } from "react";
-import { users } from "../data/users-constants";
 import { useNavigate } from "react-router-dom";
-import { login } from "../utils/storege";
+import { login } from "../utils/storage";
 import api from "../services/api";
 
+function Login() {
+  const [email, setEmail] = useState('');
+  const [senha, setSenha] = useState('');
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
 
-function Login(){
-    const [email, setEmail] = useState('');
-    const [senha, setSenha] = useState('');
-    const [error, setError] =useState('');
-    //console.log(email)
-    //console.log(senha)
-    const navigate = useNavigate();
-    async function  handleLogin() {
-        // const userFound = users.find(user => user.email === email);
-        const userFound = await api.post('/login', {email, senha} )
-        console.log(userFound);
-        if(userFound) {
-            const match = senha === userFound.senha
-            if(match) {
-                //usuario autenticado(encontrado com autorização)
-                setError('');
-                login(JSON.stringify(userFound));
-                navigate('/painel');
-                return;
-            }
-            //senha invalida
-            setError('Senha invalida');
-            return;
-        }
-        //usuario não encontrado
-        setError('Usuario não encontrado')
-        return;
+  async function handleLogin(e) {
+    e.preventDefault();
+    setError('');
+
+    try {
+      const response = await api.post('/login', { email, senha });
+      const { token, user } = response.data;
+      login(JSON.stringify({ token, user }));
+      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      navigate('/painel');
+    } catch (err) {
+      if (err.response && err.response.data) {
+        setError(err.response.data.erro || 'Email ou senha inválidos');
+      } else {
+        setError('Falha ao tentar fazer login. Tente novamente.');
+      }
     }
-    return(
-        <div className="flex-grow flex shadow m-6 rounded-[12px] bg-slate-200 justify-center items-center">
-            <div className="p-6 flex flex-col min-w-[398px] gap-3">
-                <h3 className="text-center">Faça Login na sua conta</h3>
-                <div className="flex flex-col w-[100%]">
-                    <span>E-mail</span>
-                    <input className="rounded-[6px] min-h-[40px] p-2" placeholder="informe seu e-mail" type="email" name="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-                </div>
-                <div className="field flex flex-col w-[100%] ">
-                    <span>Senha</span>
-                    <input className="rounded-[6px] min-h-[40px] p-2" placeholder="informe sua senha" type="password" name="senha" value={senha} onChange={(e) => setSenha(e.target.value)} />
-                </div>
-                <span>Esqueceu a senha</span>
-                <button onClick={handleLogin} className="text-white bg-color-primary uppercase font-bold rounded-[8px] min-h-[40px]">Entrar</button>
-                <span className="text-red-error ">{error}</span>
-            </div>
+  }
+
+  return (
+    <main className="flex items-center justify-center min-h-screen bg-gray-50 px-4">
+      <form
+        onSubmit={handleLogin}
+        className="bg-white w-full max-w-sm rounded-md shadow-md p-6 space-y-5"
+      >
+        <h2 className="text-center text-lg font-medium text-gray-700">
+          Faça login na sua conta
+        </h2>
+
+        <div className="space-y-1">
+          <label htmlFor="email" className="text-sm font-medium text-gray-600">
+            E-mail
+          </label>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            placeholder="informe seu e-mail"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-1 focus:ring-blue-300"
+          />
         </div>
-    );
-};
+
+        <div className="space-y-1">
+          <label htmlFor="senha" className="text-sm font-medium text-gray-600">
+            Senha
+          </label>
+          <input
+            id="senha"
+            name="senha"
+            type="password"
+            placeholder="informe sua senha"
+            value={senha}
+            onChange={(e) => setSenha(e.target.value)}
+            required
+            className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-1 focus:ring-blue-300"
+          />
+        </div>
+
+        <span className="block text-xs text-center text-gray-500 hover:text-blue-500 cursor-pointer transition">
+          Esqueceu a senha
+        </span>
+
+        <button
+          type="submit"
+          className="w-full bg-blue-500 text-white text-sm font-semibold py-2 rounded-md hover:bg-blue-600 transition"
+        >
+          Entrar
+        </button>
+
+        {error && (
+          <span role="alert" className="block text-center text-red-500 text-sm mt-2">
+            {error}
+          </span>
+        )}
+      </form>
+    </main>
+  );
+}
 
 export default Login;
