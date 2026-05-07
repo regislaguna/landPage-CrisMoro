@@ -12,6 +12,7 @@ import Painel from "../pages/Painel";
 import Login from "../pages/Login";
 import PrivateRoute from "../components/Auth";
 import Questionario from "../components/Questionário";
+import Prontuarios from "../pages/Prontuarios";
 
 
 function App() {
@@ -46,6 +47,7 @@ function App() {
                 <Painel/>
               </PrivateRoute>
             }/>
+            <Route path="/prontuarios" element={<Prontuarios />} />
             <Route path="/login" element={<Login/>} />
             <Route path="/servicos" element={<Servicos />} />
           </Routes>

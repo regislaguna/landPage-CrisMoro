@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { login } from "../utils/storage";
+import { login } from "../utils/storage"; // Mantemos a tua importação
 import api from "../services/api";
 
 function Login() {
@@ -16,7 +16,17 @@ function Login() {
     try {
       const response = await api.post('/login', { email, senha });
       const { token, user } = response.data;
-      login(JSON.stringify({ token, user }));
+      
+      const dadosSessao = JSON.stringify({ token, user });
+
+      // --- A CORREÇÃO MÁGICA ESTÁ AQUI ---
+      // 1. Gravamos explicitamente na chave 'login' para que o api.js e o ServicoModal encontrem!
+      localStorage.setItem('login', dadosSessao);
+      
+      // 2. Mantemos a tua função auxiliar, para não quebrar outras partes do teu projeto que possam usá-la.
+      login(dadosSessao);
+      // --- FIM DA CORREÇÃO ---
+
       api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       navigate('/painel');
     } catch (err) {

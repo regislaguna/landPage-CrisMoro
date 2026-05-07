@@ -36,15 +36,20 @@ function Questionario() {
   const gerarRespostas = () => Object.entries(formData).map(([key, value]) => `${key}: ${value}`);
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError(null);
-    setSuccess(false);
+  e.preventDefault();
+  setIsLoading(true);
 
-    const payload = { ...formData, respostas: gerarRespostas() };
+  // Convertendo arrays em strings para o banco de dados não reclamar
+  const dadosParaEnviar = {
+    ...formData,
+    motivos: formData.motivos.join(', '),
+    area_interesse: formData.area_interesse.join(', '),
+    historico_doencas: formData.historico_doencas.join(', '),
+    respostas: gerarRespostas().join(' | ') // Transforma a lista de respostas em uma string única
+  };
 
-    try {
-      await api.post('/questionario', payload);
+  try {
+    await api.post('/questionario', dadosParaEnviar);;
       setIsLoading(false);
       setSuccess(true);
       setFormData(estadoInicialFormulario);

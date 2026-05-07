@@ -1,43 +1,50 @@
-// (Código final com a conexão à API + layout com transição suave)
+// (Versão Atualizada: Corrigindo o caminho das imagens do Backend)
 import React, { useState, useEffect } from 'react';
 import { Link } from "react-router-dom";
-import api from '../services/api'; // Importa a conexão com a API
+import api from '../services/api'; 
 
-// --- Componente de Seção de Serviço ---
+// --- Configuração do Endereço do Backend ---
+// Dica de Engenharia: Em produção, isso viria de um arquivo .env
+const API_URL = "http://localhost:3333"; 
+
 const ServiceSection = ({ service, index }) => {
-  // Usamos os nomes das colunas do seu banco de dados
-  const { id, nome, descricao, image, price } = service;
+  const { id, nome, descricao, image } = service;
 
-  // Lógica para alternar o layout (mantém o seu estilo)
   const imageRight = index % 2 !== 0;
   const titleId = `service-title-${id}`;
+
+  // Lógica para construir a URL da imagem
+  // Se o caminho começar com /uploads, nós juntamos com a URL do servidor
+  const imageUrl = image 
+    ? `${API_URL}${image}` 
+    : 'https://via.placeholder.com/400x300?text=Sem+Imagem';
 
   return (
     <section
       aria-labelledby={titleId}
       className={`service-section ${imageRight ? 'image-right' : 'image-left'} 
-                  flex flex-col md:flex-row items-center my-8 p-6 bg-white 
-                  shadow-md rounded-lg animate-fadeSlide`}
+                  flex flex-col md:flex-row items-center my-12 p-6 bg-white 
+                  shadow-sm rounded-xl animate-fadeSlide border border-gray-100`}
     >
-      {/* Bloco da Imagem (puxa o 'image' do banco) */}
+      {/* Bloco da Imagem */}
       <div className={`md:w-1/2 ${imageRight ? 'md:order-2' : 'md:order-1'} flex justify-center p-4`}>
         <img
-          src={image}
+          src={imageUrl} // URL completa agora!
           alt={nome}
-          className="w-full max-w-md h-auto rounded-lg shadow-lg object-cover"
+          className="w-full max-w-md h-64 rounded-lg shadow-lg object-cover transform hover:scale-105 transition duration-500"
+          onError={(e) => { e.target.src = 'https://via.placeholder.com/400x300?text=Erro+ao+Carregar'; }}
         />
       </div>
 
-      {/* Bloco do Texto (puxa 'nome' e 'descricao' do banco) */}
-      <div className={`md:w-1/2 ${imageRight ? 'md:order-1' : 'md:order-2'} p-4 text-center md:text-left`}>
+      {/* Bloco do Texto */}
+      <div className={`md:w-1/2 ${imageRight ? 'md:order-1' : 'md:order-2'} p-8 text-center md:text-left`}>
         <h2 id={titleId} className="text-3xl font-bold text-gray-800 mb-4">{nome}</h2>
-        <p className="text-gray-600 leading-relaxed">{descricao}</p>
+        <p className="text-gray-600 text-lg leading-relaxed">{descricao}</p>
 
         <Link
           to="/agendamento"
-          className="inline-block mt-6 px-6 py-3 bg-accent-dark text-white font-semibold rounded-full 
-                     hover:bg-bg-pale transition duration-300 focus:outline-none focus:ring-2 
-                     focus:ring-offset-2 focus:ring-accent-dark"
+          className="inline-block mt-8 px-8 py-3 bg-accent-dark text-white font-semibold rounded-full 
+                     hover:bg-opacity-90 transition duration-300 shadow-md hover:shadow-lg"
         >
           Agendar Agora
         </Link>
@@ -46,19 +53,17 @@ const ServiceSection = ({ service, index }) => {
   );
 };
 
-// --- Página principal de Serviços ---
 function Servicos() {
   const [servicos, setServicos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Busca os dados da API quando a página carregar
   useEffect(() => {
     async function fetchServicos() {
       try {
         setLoading(true);
         const response = await api.get('/servicos');
-        setServicos(response.data); // Guarda os serviços no estado
+        setServicos(response.data);
       } catch (err) {
         console.error("Erro ao buscar serviços:", err);
         setError("Não foi possível carregar os serviços no momento.");
@@ -70,29 +75,38 @@ function Servicos() {
   }, []);
 
   return (
-    <div className="servicos-page-container bg-bg-cream min-h-screen">
-      <main className="container mx-auto px-4 py-8">
-        <h1 className="text-4xl font-extrabold text-center text-text-dark mb-12 animate-fadeSlide">
-          Nossos Serviços de Estética
-        </h1>
+    <div className="servicos-page-container bg-gray-50 min-h-screen">
+      <main className="container mx-auto px-4 py-16">
+        <header className="text-center mb-16">
+          <h1 className="text-5xl font-black text-gray-900 mb-4">
+            Nossos Serviços de Estética
+          </h1>
+          <div className="w-24 h-1 bg-accent-dark mx-auto rounded-full"></div>
+        </header>
 
-        {/* Feedback para o usuário */}
         {loading && (
-          <p className="text-center text-text-medium text-lg">A carregar serviços...</p>
-        )}
-        {error && (
-          <p role="alert" className="text-center text-red-600 text-lg">{error}</p>
+          <div className="flex flex-col items-center justify-center py-20">
+             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent-dark mb-4"></div>
+             <p className="text-gray-500 text-lg">Buscando tratamentos...</p>
+          </div>
         )}
 
-        <section className="service-list" aria-label="Lista de serviços detalhados">
+        {error && (
+          <div className="text-center p-10 bg-red-50 rounded-lg">
+            <p role="alert" className="text-red-600 text-lg font-medium">{error}</p>
+            <button onClick={() => window.location.reload()} className="mt-4 text-red-700 underline">Tentar novamente</button>
+          </div>
+        )}
+
+        <section className="service-list max-w-6xl mx-auto" aria-label="Lista de serviços detalhados">
           {!loading && !error && servicos.map((service, index) => (
             <ServiceSection key={service.id} service={service} index={index} />
           ))}
 
           {!loading && !error && servicos.length === 0 && (
-            <p className="text-center text-text-medium text-lg">
-              Nenhum serviço cadastrado no momento.
-            </p>
+            <div className="text-center py-20">
+              <p className="text-gray-400 text-xl">Nenhum serviço disponível no momento.</p>
+            </div>
           )}
         </section>
       </main>

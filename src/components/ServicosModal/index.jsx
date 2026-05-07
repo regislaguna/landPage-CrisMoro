@@ -1,7 +1,9 @@
+// --- DOCUMENTAÇÃO: IMPORTAÇÕES NECESSÁRIAS ---
 import React, { useState, useEffect } from 'react';
-import api from '../../services/api';
+import api from '../../services/api'; // Verifica se o caminho está correto no teu projeto
 
 function ServicoModal({ servicoAtual, onClose, onSave }) {
+  // --- DOCUMENTAÇÃO: ESTADO DO FORMULÁRIO ---
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -10,15 +12,15 @@ function ServicoModal({ servicoAtual, onClose, onSave }) {
   });
 
   const [imageFile, setImageFile] = useState(null);
-  const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  // --- DOCUMENTAÇÃO: PREENCHIMENTO AUTOMÁTICO (EDIÇÃO) ---
   useEffect(() => {
     if (servicoAtual) {
       setFormData({
-        title: servicoAtual.nome || '',
-        description: servicoAtual.descricao || '',
+        title: servicoAtual.nome || servicoAtual.title || '',
+        description: servicoAtual.descricao || servicoAtual.description || '',
         price: servicoAtual.price || '',
         image: servicoAtual.image || '',
       });
@@ -36,47 +38,68 @@ function ServicoModal({ servicoAtual, onClose, onSave }) {
     }
   };
 
+  // --- DOCUMENTAÇÃO: FUNÇÃO PRINCIPAL DE ENVIO (ATUALIZADA) ---
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
-    let imageUrl = formData.image;
 
     try {
-      if (imageFile) {
-        setUploading(true);
-        const fileUploadData = new FormData();
-        fileUploadData.append('file', imageFile);
+      // 1. Buscar Utilizador Logado (Para enviar o Token no cabeçalho)
+      const storageData = localStorage.getItem('login');
+      const parsedData = storageData ? JSON.parse(storageData) : null;
+      const token = parsedData?.token;
 
-        const uploadResponse = await api.post('/upload', fileUploadData, {
-          headers: { 'Content-Type': 'multipart/form-data' },
-        });
-
-        imageUrl = uploadResponse.data.url;
-        setUploading(false);
+      if (!token) {
+        throw new Error('Sessão expirada. Por favor, faça login novamente.');
       }
 
-      const dadosDoServico = {
-        title: formData.title,
-        description: formData.description,
-        price: parseFloat(formData.price),
-        image: imageUrl,
+      // 2. Preparar e Limpar os Dados (Substitui vírgula por ponto)
+      const precoLimpo = formData.price.toString().replace(',', '.');
+      const precoFormatado = parseFloat(precoLimpo);
+
+      // 3. Criar o "Envelope" FormData (Permite enviar textos e ficheiros juntos)
+      const submitData = new FormData();
+      submitData.append('title', formData.title);
+      submitData.append('description', formData.description);
+      submitData.append('price', precoFormatado);
+      
+      // Se o utilizador escolheu uma foto nova, adicionamos ao envelope.
+      // IMPORTANTE: O nome 'image' aqui tem de ser o mesmo que usaste no upload.single('image') no Backend!
+      if (imageFile) {
+        submitData.append('image', imageFile);
+      }
+
+      // 4. Configurar o Cabeçalho (Avisa o backend que estamos a enviar um FormData)
+      const config = {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          'Authorization': `Bearer ${token}`
+        }
       };
 
-      const response = servicoAtual
-        ? await api.put(`/servicos/${servicoAtual.id}`, dadosDoServico)
-        : await api.post('/servicos', dadosDoServico);
+      // 5. Chamada para a API (Tudo numa única viagem!)
+      let response;
+      if (servicoAtual && servicoAtual.id) {
+        // Se já existe, atualiza
+        response = await api.put(`/servicos/${servicoAtual.id}`, submitData, config);
+      } else {
+        // Se é novo, cria
+        response = await api.post('/servicos', submitData, config);
+      }
 
       onSave(response.data);
+      onClose(); // Fecha o modal com sucesso!
+      
     } catch (err) {
-      console.error(err);
-      setError('Falha ao salvar o serviço. Verifique os campos.');
+      console.error("Erro detalhado:", err.response?.data || err.message);
+      setError(err.response?.data?.erro || err.message || 'Falha ao salvar o serviço.');
     } finally {
       setLoading(false);
-      setUploading(false);
     }
   };
-
+  
+  // --- DOCUMENTAÇÃO: INTERFACE VISUAL (JSX) ---
   return (
     <div className="fixed inset-0 bg-black bg-opacity-30 z-50 flex items-center justify-center" onClick={onClose}>
       <div
@@ -87,12 +110,7 @@ function ServicoModal({ servicoAtual, onClose, onSave }) {
           <h3 className="text-lg font-medium text-gray-700">
             {servicoAtual ? 'Editar Serviço' : 'Adicionar Serviço'}
           </h3>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 text-sm"
-          >
-            ✕
-          </button>
+          <button type="button" onClick={onClose} className="text-gray-400 hover:text-gray-600 text-sm">✕</button>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-3 text-sm text-gray-700">
@@ -126,8 +144,8 @@ function ServicoModal({ servicoAtual, onClose, onSave }) {
             <input
               id="price"
               name="price"
-              type="number"
-              step="0.01"
+              type="text" 
+              placeholder="Ex: 150,00"
               value={formData.price}
               onChange={handleChange}
               required
@@ -141,17 +159,18 @@ function ServicoModal({ servicoAtual, onClose, onSave }) {
               id="imageFile"
               name="imageFile"
               type="file"
+              accept="image/*"
               onChange={handleFileChange}
               className="w-full mt-1 border border-gray-300 rounded-md px-3 py-2 text-sm"
             />
             {formData.image && !imageFile && (
-              <p className="text-xs text-gray-500 mt-1">
-                Imagem atual: {formData.image.substring(0, 50)}...
+              <p className="text-xs text-gray-500 mt-1 truncate">
+                Imagem atual cadastrada. Envie outra apenas se quiser substituir.
               </p>
             )}
           </div>
 
-          {error && <p role="alert" className="text-red-500">{error}</p>}
+          {error && <p role="alert" className="text-red-500 text-xs">{error}</p>}
 
           <div className="flex justify-end gap-2 pt-2">
             <button
@@ -164,10 +183,10 @@ function ServicoModal({ servicoAtual, onClose, onSave }) {
             </button>
             <button
               type="submit"
-              disabled={loading || uploading}
+              disabled={loading}
               className="bg-blue-400 text-white text-xs px-4 py-1 rounded-md hover:bg-blue-500 transition disabled:bg-gray-400"
             >
-              {uploading ? 'Enviando...' : loading ? 'Salvando...' : 'Salvar'}
+              {loading ? 'Salvando...' : 'Salvar'}
             </button>
           </div>
         </form>
