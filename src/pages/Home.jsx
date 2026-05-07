@@ -8,7 +8,7 @@ import Carousel from '../components/Carousel';
 import api from '../services/api';
 
 // --- CONFIGURAÇÃO: Endereço do seu Backend ---
-const API_URL = "http://localhost:3333";
+const API_URL = "https://apicrismoro-production.up.railway.app";
 
 function HomePage() {
   const [servicos, setServicos] = useState([]);
