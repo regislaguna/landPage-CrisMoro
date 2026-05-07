@@ -17,10 +17,10 @@ const Footer = () => {
             <a href="https://www.instagram.com/esteticacrismoro?igsh=aWx0MTA4em9zaGxo " aria-label="Instagram" className="text-gray-400 hover:text-accent-light text-xl">
               <FontAwesomeIcon icon={faInstagram} />
             </a>
-            <a href="#" aria-label="Facebook" className="text-gray-400 hover:text-accent-light text-xl">
+            <a href="#!" aria-label="Facebook" className="text-gray-400 hover:text-accent-light text-xl">
               <FontAwesomeIcon icon={faFacebookF} />
             </a>
-            <a href="#" aria-label="Pinterest" className="text-gray-400 hover:text-accent-light text-xl">
+            <a href="#!" aria-label="Pinterest" className="text-gray-400 hover:text-accent-light text-xl">
               <FontAwesomeIcon icon={faPinterestP} />
             </a>
           </div>
@@ -30,10 +30,10 @@ const Footer = () => {
         <div>
           <h3 className="text-lg font-bold text-white mb-4">SERVIÇOS</h3>
           <ul className="space-y-2 text-sm">
-            <li><a href="#" className="hover:text-accent-light transition">Limpeza de Pele</a></li>
-            <li><a href="#" className="hover:text-accent-light transition">Drenagem</a></li>
-            <li><a href="#" className="hover:text-accent-light transition">Peeling</a></li>
-            <li><a href="#" className="hover:text-accent-light transition">Massagem</a></li>
+            <li><a href="#!" className="hover:text-accent-light transition">Limpeza de Pele</a></li>
+            <li><a href="#!" className="hover:text-accent-light transition">Drenagem</a></li>
+            <li><a href="#!" className="hover:text-accent-light transition">Peeling</a></li>
+            <li><a href="#!" className="hover:text-accent-light transition">Massagem</a></li>
           </ul>
         </div>
 
@@ -41,10 +41,10 @@ const Footer = () => {
         <div>
           <h3 className="text-lg font-bold text-white mb-4">INFORMAÇÕES</h3>
           <ul className="space-y-2 text-sm">
-            <li><a href="#" className="hover:text-accent-light transition">FAQ</a></li>
-            <li><a href="#" className="hover:text-accent-light transition">Política de Privacidade</a></li>
-            <li><a href="#" className="hover:text-accent-light transition">Termos de Serviço</a></li>
-            <li><a href="#" className="hover:text-accent-light transition">Blog</a></li>
+            <li><a href="#!" className="hover:text-accent-light transition">FAQ</a></li>
+            <li><a href="#!" className="hover:text-accent-light transition">Política de Privacidade</a></li>
+            <li><a href="#!" className="hover:text-accent-light transition">Termos de Serviço</a></li>
+            <li><a href="#!" className="hover:text-accent-light transition">Blog</a></li>
           </ul>
         </div>
 
