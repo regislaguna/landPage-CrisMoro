@@ -5,7 +5,7 @@ import api from '../services/api';
 
 // --- Configuração do Endereço do Backend ---
 // Dica de Engenharia: Em produção, isso viria de um arquivo .env
-const API_URL = "http://https://apicrismoro-production.up.railway.app"; 
+const API_URL = "https://apicrismoro-production.up.railway.app"; 
 
 const ServiceSection = ({ service, index }) => {
   const { id, nome, descricao, image } = service;
