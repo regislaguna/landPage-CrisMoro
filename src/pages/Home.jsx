@@ -87,7 +87,7 @@ function HomePage() {
               // --- LÓGICA DE IMAGEM CORRIGIDA ---
               // Concatenamos a URL do servidor com o caminho salvo no banco
               const fullImageUrl = service.image 
-                ? `${API_URL}${service.image}` 
+                ? `${API_URL}/uploads/${service.image}` 
                 : 'https://via.placeholder.com/400x300?text=Clínica+Estética';
 
               return (

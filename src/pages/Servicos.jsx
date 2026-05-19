@@ -5,7 +5,7 @@ import api from '../services/api';
 
 // --- Configuração do Endereço do Backend ---
 // Dica de Engenharia: Em produção, isso viria de um arquivo .env
-const API_URL = "https://apicrismoro-production.up.railway.app"; 
+const API_URL = "https://api-crismoro-aqanhzdpdphcemc2.westus3-01.azurewebsites.net/"; 
 
 const ServiceSection = ({ service, index }) => {
   const { id, nome, descricao, image } = service;
@@ -15,9 +15,9 @@ const ServiceSection = ({ service, index }) => {
 
   // Lógica para construir a URL da imagem
   // Se o caminho começar com /uploads, nós juntamos com a URL do servidor
-  const imageUrl = image 
-    ? `${API_URL}${image}` 
-    : 'https://via.placeholder.com/400x300?text=Sem+Imagem';
+  const fullImageUrl = service.image 
+  ? `${API_URL}/uploads/${service.image}` 
+  : 'https://via.placeholder.com/400x300?text=Clínica+Estética';
 
   return (
     <section
