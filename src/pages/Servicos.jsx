@@ -1,11 +1,7 @@
-// (Versão Atualizada: Corrigindo o caminho das imagens do Backend)
+// (Versão Atualizada: Integrada com Azure Blob Storage)
 import React, { useState, useEffect } from 'react';
 import { Link } from "react-router-dom";
 import api from '../services/api'; 
-
-// --- Configuração do Endereço do Backend ---
-// Dica de Engenharia: Em produção, isso viria de um arquivo .env
-const API_URL = "https://api-crismoro-aqanhzdpdphcemc2.westus3-01.azurewebsites.net/"; 
 
 const ServiceSection = ({ service, index }) => {
   const { id, nome, descricao, image } = service;
@@ -13,11 +9,13 @@ const ServiceSection = ({ service, index }) => {
   const imageRight = index % 2 !== 0;
   const titleId = `service-title-${id}`;
 
-  // Lógica para construir a URL da imagem
-  // Se o caminho começar com /uploads, nós juntamos com a URL do servidor
-  const fullImageUrl = service.image 
-  ? `${API_URL}/uploads/${service.image}` 
-  : 'https://via.placeholder.com/400x300?text=Clínica+Estética';
+  /* * Lógica Azure Blob Storage: 
+   * Se o campo 'image' existir, usamos ele diretamente (pois já é a URL completa da Azure).
+   * Caso contrário, recorremos ao placeholder padrão.
+   */
+  const finalImageUrl = image 
+    ? image 
+    : 'https://via.placeholder.com/400x300?text=Clínica+Estética';
 
   return (
     <section
@@ -29,7 +27,7 @@ const ServiceSection = ({ service, index }) => {
       {/* Bloco da Imagem */}
       <div className={`md:w-1/2 ${imageRight ? 'md:order-2' : 'md:order-1'} flex justify-center p-4`}>
         <img
-          src={imageUrl} // URL completa agora!
+          src={finalImageUrl} // Corrigido: Agora puxando o nome exato da variável definida acima!
           alt={nome}
           className="w-full max-w-md h-64 rounded-lg shadow-lg object-cover transform hover:scale-105 transition duration-500"
           onError={(e) => { e.target.src = 'https://via.placeholder.com/400x300?text=Erro+ao+Carregar'; }}
