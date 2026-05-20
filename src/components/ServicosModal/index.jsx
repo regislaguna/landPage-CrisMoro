@@ -1,9 +1,9 @@
-// --- DOCUMENTAÇÃO: IMPORTAÇÕES NECESSÁRIAS ---
+// --- IMPORTAÇÕES NECESSÁRIAS ---
 import React, { useState, useEffect } from 'react';
-import api from '../../services/api'; // Verifica se o caminho está correto no teu projeto
+import api from '../../services/api'; // Verifique se o caminho está correto no seu projeto
 
 function ServicoModal({ servicoAtual, onClose, onSave }) {
-  // --- DOCUMENTAÇÃO: ESTADO DO FORMULÁRIO ---
+  // --- ESTADO DO FORMULÁRIO ---
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -15,7 +15,7 @@ function ServicoModal({ servicoAtual, onClose, onSave }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // --- DOCUMENTAÇÃO: PREENCHIMENTO AUTOMÁTICO (EDIÇÃO) ---
+  // --- PREENCHIMENTO AUTOMÁTICO (EDIÇÃO) ---
   useEffect(() => {
     if (servicoAtual) {
       setFormData({
@@ -38,14 +38,14 @@ function ServicoModal({ servicoAtual, onClose, onSave }) {
     }
   };
 
-  // --- DOCUMENTAÇÃO: FUNÇÃO PRINCIPAL DE ENVIO (ATUALIZADA) ---
+  // --- FUNÇÃO PRINCIPAL DE ENVIO ---
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
     try {
-      // 1. Buscar Utilizador Logado (Para enviar o Token no cabeçalho)
+      // 1. Buscar Utilizador Logado (Token no cabeçalho)
       const storageData = localStorage.getItem('login');
       const parsedData = storageData ? JSON.parse(storageData) : null;
       const token = parsedData?.token;
@@ -54,23 +54,24 @@ function ServicoModal({ servicoAtual, onClose, onSave }) {
         throw new Error('Sessão expirada. Por favor, faça login novamente.');
       }
 
-      // 2. Preparar e Limpar os Dados (Substitui vírgula por ponto)
+      // 2. Preparar e validar preço
       const precoLimpo = formData.price.toString().replace(',', '.');
       const precoFormatado = parseFloat(precoLimpo);
+      if (isNaN(precoFormatado)) {
+        throw new Error("Preço inválido. Use apenas números.");
+      }
 
-      // 3. Criar o "Envelope" FormData (Permite enviar textos e ficheiros juntos)
+      // 3. Criar FormData
       const submitData = new FormData();
       submitData.append('title', formData.title);
       submitData.append('description', formData.description);
       submitData.append('price', precoFormatado);
-      
-      // Se o utilizador escolheu uma foto nova, adicionamos ao envelope.
-      // IMPORTANTE: O nome 'image' aqui tem de ser o mesmo que usaste no upload.single('image') no Backend!
+
       if (imageFile) {
-        submitData.append('image', imageFile);
+        submitData.append('image', imageFile); // nome deve bater com upload.single('image') no backend
       }
 
-      // 4. Configurar o Cabeçalho (Avisa o backend que estamos a enviar um FormData)
+      // 4. Configurar cabeçalho
       const config = {
         headers: {
           'Content-Type': 'multipart/form-data',
@@ -78,19 +79,17 @@ function ServicoModal({ servicoAtual, onClose, onSave }) {
         }
       };
 
-      // 5. Chamada para a API (Tudo numa única viagem!)
+      // 5. Chamada API
       let response;
       if (servicoAtual && servicoAtual.id) {
-        // Se já existe, atualiza
         response = await api.put(`/servicos/${servicoAtual.id}`, submitData, config);
       } else {
-        // Se é novo, cria
         response = await api.post('/servicos', submitData, config);
       }
 
       onSave(response.data);
-      onClose(); // Fecha o modal com sucesso!
-      
+      onClose();
+
     } catch (err) {
       console.error("Erro detalhado:", err.response?.data || err.message);
       setError(err.response?.data?.erro || err.message || 'Falha ao salvar o serviço.');
@@ -98,8 +97,8 @@ function ServicoModal({ servicoAtual, onClose, onSave }) {
       setLoading(false);
     }
   };
-  
-  // --- DOCUMENTAÇÃO: INTERFACE VISUAL (JSX) ---
+
+  // --- INTERFACE VISUAL ---
   return (
     <div className="fixed inset-0 bg-black bg-opacity-30 z-50 flex items-center justify-center" onClick={onClose}>
       <div
@@ -110,7 +109,7 @@ function ServicoModal({ servicoAtual, onClose, onSave }) {
           <h3 className="text-lg font-medium text-gray-700">
             {servicoAtual ? 'Editar Serviço' : 'Adicionar Serviço'}
           </h3>
-          <button type="button" onClick={onClose} className="text-gray-400 hover:text-gray-600 text-sm">✕</button>
+          <button type="button" onClick={onClose} className="text-gray-400 hover:text-gray-600 text-sm" aria-label="Fechar modal">✕</button>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-3 text-sm text-gray-700">
@@ -144,7 +143,7 @@ function ServicoModal({ servicoAtual, onClose, onSave }) {
             <input
               id="price"
               name="price"
-              type="text" 
+              type="text"
               placeholder="Ex: 150,00"
               value={formData.price}
               onChange={handleChange}
@@ -167,6 +166,9 @@ function ServicoModal({ servicoAtual, onClose, onSave }) {
               <p className="text-xs text-gray-500 mt-1 truncate">
                 Imagem atual cadastrada. Envie outra apenas se quiser substituir.
               </p>
+            )}
+            {imageFile && (
+              <img src={URL.createObjectURL(imageFile)} alt="Preview" className="mt-2 h-24 rounded shadow" />
             )}
           </div>
 
