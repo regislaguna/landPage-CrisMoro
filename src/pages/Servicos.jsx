@@ -1,7 +1,11 @@
-// (Versão Atualizada: Integrada com Azure Blob Storage)
+// (Versão Atualizada: Integrada com Azure Blob Storage e Ajuste de URL)
 import React, { useState, useEffect } from 'react';
 import { Link } from "react-router-dom";
 import api from '../services/api'; 
+
+// CONFIGURAÇÃO DA AZURE (Substitua pelos seus dados reais da Azure se o banco não trouxer o link completo)
+const AZURE_STORAGE_ACCOUNT = "stclinicacrismoro"; 
+const AZURE_CONTAINER = "$logs";
 
 const ServiceSection = ({ service, index }) => {
   const { id, nome, descricao, image } = service;
@@ -9,13 +13,21 @@ const ServiceSection = ({ service, index }) => {
   const imageRight = index % 2 !== 0;
   const titleId = `service-title-${id}`;
 
-  /* * Lógica Azure Blob Storage: 
-   * Se o campo 'image' existir, usamos ele diretamente (pois já é a URL completa da Azure).
-   * Caso contrário, recorremos ao placeholder padrão.
+  /* * LÓGICA DE TRATAMENTO DE IMAGEM DA AZURE:
+   * 1. Se não houver imagem, usa o placeholder da clínica.
+   * 2. Se a imagem já vier com "http" do backend, usa ela direto.
+   * 3. Se vier apenas o nome do arquivo, monta a URL completa da Azure automaticamente!
    */
-  const finalImageUrl = image 
-    ? image 
-    : 'https://via.placeholder.com/400x300?text=Clínica+Estética';
+  let finalImageUrl = 'https://via.placeholder.com/400x300?text=Cl%C3%ADnica+Est%C3%A9tica';
+  
+  if (image) {
+    if (image.startsWith('http://') || image.startsWith('https://')) {
+      finalImageUrl = image; // Já é a URL completa da Azure
+    } else {
+      // É apenas o nome do arquivo, montamos a URL do Blob Storage
+      finalImageUrl = `https://${AZURE_STORAGE_ACCOUNT}.blob.core.windows.net/${AZURE_CONTAINER}/${image}`;
+    }
+  }
 
   return (
     <section
@@ -27,11 +39,15 @@ const ServiceSection = ({ service, index }) => {
       {/* Bloco da Imagem */}
       <div className={`md:w-1/2 ${imageRight ? 'md:order-2' : 'md:order-1'} flex justify-center p-4`}>
         <img
-          src={finalImageUrl} // Corrigido: Agora puxando o nome exato da variável definida acima!
+          src={finalImageUrl} 
           alt={nome}
           className="w-full max-w-md h-64 rounded-lg shadow-lg object-cover transform hover:scale-105 transition duration-500"
-          onError={(e) => { e.target.src = 'https://via.placeholder.com/400x300?text=Erro+ao+Carregar'; }}
+          onError={(e) => { 
+            // Se mesmo montando a URL der erro de acesso (container privado), ele mostra o placeholder de aviso
+            e.target.src = 'https://via.placeholder.com/400x300?text=Acesso+Restrito+Azure'; 
+          }}
         />
+      }
       </div>
 
       {/* Bloco do Texto */}
