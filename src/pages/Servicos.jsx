@@ -5,7 +5,7 @@ import api from '../services/api';
 
 // CONFIGURAÇÃO DA AZURE (Substitua pelos seus dados reais da Azure se o banco não trouxer o link completo)
 const AZURE_STORAGE_ACCOUNT = "stclinicacrismoro"; 
-const AZURE_CONTAINER = "$logs";
+const AZURE_CONTAINER = "images";
 
 const ServiceSection = ({ service, index }) => {
   const { id, nome, descricao, image } = service;
@@ -47,8 +47,7 @@ const ServiceSection = ({ service, index }) => {
             e.target.src = 'https://via.placeholder.com/400x300?text=Acesso+Restrito+Azure'; 
           }}
         />
-      }
-      </div>
+       </div>
 
       {/* Bloco do Texto */}
       <div className={`md:w-1/2 ${imageRight ? 'md:order-1' : 'md:order-2'} p-8 text-center md:text-left`}>
