@@ -1,9 +1,9 @@
-// (Versão Atualizada: Integrada com Azure Blob Storage e Ajuste de URL)
+// (Versão Atualizada: Integrada com Azure Blob Storage e Fallback Nativo Sem Placeholders)
 import React, { useState, useEffect } from 'react';
 import { Link } from "react-router-dom";
 import api from '../services/api'; 
 
-// CONFIGURAÇÃO DA AZURE (Substitua pelos seus dados reais da Azure se o banco não trouxer o link completo)
+// CONFIGURAÇÃO DA AZURE
 const AZURE_STORAGE_ACCOUNT = "stclinicacrismoro"; 
 const AZURE_CONTAINER = "images";
 
@@ -14,17 +14,15 @@ const ServiceSection = ({ service, index }) => {
   const titleId = `service-title-${id}`;
 
   /* * LÓGICA DE TRATAMENTO DE IMAGEM DA AZURE:
-   * 1. Se não houver imagem, usa o placeholder da clínica.
-   * 2. Se a imagem já vier com "http" do backend, usa ela direto.
-   * 3. Se vier apenas o nome do arquivo, monta a URL completa da Azure automaticamente!
+   * 1. Se a imagem já vier com "http" do backend, usa ela direto.
+   * 2. Se vier apenas o nome do arquivo, monta a URL completa da Azure automaticamente!
    */
-  let finalImageUrl = 'https://via.placeholder.com/400x300?text=Cl%C3%ADnica+Est%C3%A9tica';
+  let finalImageUrl = null;
   
   if (image) {
     if (image.startsWith('http://') || image.startsWith('https://')) {
-      finalImageUrl = image; // Já é a URL completa da Azure
+      finalImageUrl = image; 
     } else {
-      // É apenas o nome do arquivo, montamos a URL do Blob Storage
       finalImageUrl = `https://${AZURE_STORAGE_ACCOUNT}.blob.core.windows.net/${AZURE_CONTAINER}/${image}`;
     }
   }
@@ -38,16 +36,45 @@ const ServiceSection = ({ service, index }) => {
     >
       {/* Bloco da Imagem */}
       <div className={`md:w-1/2 ${imageRight ? 'md:order-2' : 'md:order-1'} flex justify-center p-4`}>
-        <img
-          src={finalImageUrl} 
-          alt={nome}
-          className="w-full max-w-md h-64 rounded-lg shadow-lg object-cover transform hover:scale-105 transition duration-500"
-          onError={(e) => { 
-            // Se mesmo montando a URL der erro de acesso (container privado), ele mostra o placeholder de aviso
-            e.target.src = 'https://via.placeholder.com/400x300?text=Acesso+Restrito+Azure'; 
-          }}
-        />
-       </div>
+        {finalImageUrl ? (
+          <>
+            <img
+              src={finalImageUrl} 
+              alt={nome}
+              className="w-full max-w-md h-64 rounded-lg shadow-lg object-cover transform hover:scale-105 transition duration-500"
+              onError={(e) => { 
+                // 1. Cospe o link exato no console para você debugar o acesso da Azure
+                console.log(`👉 O LINK QUE FALHOU NO SERVIÇO [${nome}] FOI:`, finalImageUrl);
+                
+                // 2. Oculta a imagem quebrada e ativa o bloco de aviso cinza nativo
+                e.target.style.display = 'none'; 
+                const fallbackBox = document.getElementById(`fallback-box-${id}`);
+                if (fallbackBox) fallbackBox.style.display = 'flex';
+              }}
+            />
+            
+            {/* Fallback Box que inicia oculto e só aparece se a imagem falhar */}
+            <div 
+              id={`fallback-box-${id}`}
+              style={{ display: 'none' }}
+              className="w-full max-w-md h-64 rounded-lg shadow-lg bg-gray-100 flex flex-col items-center justify-center p-4 text-gray-400"
+            >
+              <svg className="w-16 h-16 mb-2 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span className="text-sm font-medium">Imagem indisponível</span>
+            </div>
+          </>
+        ) : (
+          /* Caso o serviço não tenha nenhuma imagem vinculada no banco de dados */
+          <div className="w-full max-w-md h-64 rounded-lg shadow-lg bg-gray-100 flex flex-col items-center justify-center p-4 text-gray-400">
+            <svg className="w-16 h-16 mb-2 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            <span className="text-sm font-medium">Sem imagem cadastrada</span>
+          </div>
+        )}
+      </div>
 
       {/* Bloco do Texto */}
       <div className={`md:w-1/2 ${imageRight ? 'md:order-1' : 'md:order-2'} p-8 text-center md:text-left`}>
