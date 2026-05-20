@@ -5,7 +5,7 @@ import axios from 'axios';
 // 1. Criação da instância base do Axios. 
 // Define a morada (URL) onde o teu Backend está alojado.
 const api = axios.create({
-  baseURL: 'https://api-crismoro-aqanhzdpdphcemc2.westus3-01.azurewebsites.net/' // Confirma se esta é a porta correta do teu Backend
+  baseURL: 'https://api-crismoro-aqanhzdpdphcemc2.westus3-01.azurewebsites.net' // Confirma se esta é a porta correta do teu Backend
 });
 
 // 2. Configuração do Interceptor de Pedidos (Request Interceptor)
