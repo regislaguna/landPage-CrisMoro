@@ -8,7 +8,11 @@ const AZURE_STORAGE_ACCOUNT = "stclinicacrismoro";
 const AZURE_CONTAINER = "images";
 
 const ServiceSection = ({ service, index }) => {
-  const { id, nome, descricao, image } = service;
+  // ✅ ADEQUAÇÃO: Tratamento preventivo para aceitar tanto propriedades em português quanto em inglês vindas da API
+  const id = service.id;
+  const nome = service.nome || service.title || "Tratamento";
+  const descricao = service.descricao || service.description || "";
+  const image = service.image;
 
   const imageRight = index % 2 !== 0;
   const titleId = `service-title-${id}`;
@@ -62,7 +66,7 @@ const ServiceSection = ({ service, index }) => {
               <svg className="w-16 h-16 mb-2 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
-              <span className="text-sm font-medium">Imagem indisponível</span>
+              <span className="text-sm font-medium text-center">Imagem em sincronização ou indisponível</span>
             </div>
           </>
         ) : (
@@ -82,7 +86,7 @@ const ServiceSection = ({ service, index }) => {
         <p className="text-gray-600 text-lg leading-relaxed">{descricao}</p>
 
         <Link
-          to="/agendamento"
+          to={`/agendamento?servico=${id}`} // ✅ ADEQUAÇÃO: Passa o ID do serviço na URL para pré-seleção inteligente automatizada!
           className="inline-block mt-8 px-8 py-3 bg-accent-dark text-white font-semibold rounded-full 
                      hover:bg-opacity-90 transition duration-300 shadow-md hover:shadow-lg"
         >
@@ -103,7 +107,8 @@ function Servicos() {
       try {
         setLoading(true);
         const response = await api.get('/servicos');
-        setServicos(response.data);
+        // ✅ ADEQUAÇÃO: Garante o tratamento caso a resposta da API venha vazia ou em formato diferente
+        setServicos(Array.isArray(response.data) ? response.data : []);
       } catch (err) {
         console.error("Erro ao buscar serviços:", err);
         setError("Não foi possível carregar os serviços no momento.");

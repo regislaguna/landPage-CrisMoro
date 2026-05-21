@@ -1,14 +1,15 @@
 /*
 * Ficheiro: src/pages/HomePage.jsx
-* Documentação: Página inicial com correção de caminho de imagens para serviços em destaque.
+* Documentação: Página inicial com correção de caminho de imagens integrado ao Azure Blob Storage.
 */
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Carousel from '../components/Carousel';
 import api from '../services/api';
 
-// --- CONFIGURAÇÃO: Endereço do seu Backend ---
-const API_URL = "https://apicrismoro-production.up.railway.app";
+// --- CONFIGURAÇÃO DA AZURE MANTIDA EM CONFORMIDADE ---
+const AZURE_STORAGE_ACCOUNT = "stclinicacrismoro"; 
+const AZURE_CONTAINER = "images";
 
 function HomePage() {
   const [servicos, setServicos] = useState([]);
@@ -20,7 +21,7 @@ function HomePage() {
       try {
         setLoading(true);
         const response = await api.get('/servicos');
-        setServicos(response.data);
+        setServicos(Array.isArray(response.data) ? response.data : []);
       } catch (err) {
         console.error("Erro ao buscar serviços:", err);
         setError("Não foi possível carregar os serviços em destaque.");
@@ -71,7 +72,7 @@ function HomePage() {
         </p>
       </section>
 
-      {/* === SEÇÃO DESTAQUES (CORRIGIDA) === */}
+      {/* === SEÇÃO DESTAQUES === */}
       <section className="bg-bg-cream py-16 animate-fadeSlide">
         <div className="container mx-auto px-6">
           <h2 className="text-3xl font-bold text-center text-text-dark mb-12">
@@ -84,25 +85,40 @@ function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {!loading && !error && servicos.slice(0, 3).map((service) => {
               
-              // --- LÓGICA DE IMAGEM CORRIGIDA ---
-              // Concatenamos a URL do servidor com o caminho salvo no banco
-              const fullImageUrl = service.image 
-                ? `${API_URL}/uploads/${service.image}` 
-                : 'https://via.placeholder.com/400x300?text=Clínica+Estética';
+              const id = service.id;
+              const nome = service.nome || service.title || "Tratamento";
+              const descricao = service.descricao || service.description || "";
+              const image = service.image;
+
+              // --- LÓGICA DE IMAGEM DA AZURE COMPATÍVEL ---
+              let finalImageUrl = null;
+              if (image) {
+                if (image.startsWith('http://') || image.startsWith('https://')) {
+                  finalImageUrl = image;
+                } else {
+                  finalImageUrl = `https://${AZURE_STORAGE_ACCOUNT}.blob.core.windows.net/${AZURE_CONTAINER}/${image}`;
+                }
+              }
 
               return (
-                <div key={service.id} className="bg-white rounded-lg shadow-lg p-6 text-center hover:shadow-xl transition duration-300 flex flex-col">
+                <div key={id} className="bg-white rounded-lg shadow-lg p-6 text-center hover:shadow-xl transition duration-300 flex flex-col">
                   <img 
-                    src={fullImageUrl} // Usando a URL completa corrigida
-                    alt={service.nome} 
-                    className="rounded-md mb-4 h-48 w-full object-cover shadow-sm"
-                    onError={(e) => { e.target.src = 'https://via.placeholder.com/400x300?text=Imagem+Indisponível'; }}
+                    src={finalImageUrl || 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?q=80&w=500&auto=format&fit=crop'} 
+                    alt={nome} 
+                    className="rounded-md mb-4 h-48 w-full object-cover shadow-sm transform hover:scale-105 transition duration-300"
+                    onError={(e) => { 
+                      e.target.onerror = null; 
+                      // Fallback elegante caso a Azure bloqueie ou a imagem não exista no Storage
+                      e.target.src = 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?q=80&w=500&auto=format&fit=crop'; 
+                    }}
                   />
-                  <h3 className="text-xl font-semibold text-accent-dark mb-2">{service.nome}</h3>
-                  <p className="text-text-medium mb-4 flex-grow">{service.descricao}</p>
+                  <h3 className="text-xl font-semibold text-accent-dark mb-2">{nome}</h3>
+                  <p className="text-text-medium mb-4 flex-grow line-clamp-3">{descricao}</p>
+                  
+                  {/* Link com ID numérico para manter o formulário de agendamento 100% funcional sem quebras */}
                   <Link 
-                    to={`/agendamento?servico=${encodeURIComponent(service.nome)}`} 
-                    className="mt-auto px-4 py-2 bg-accent-dark text-white rounded-full hover:bg-accent-light hover:text-text-dark transition"
+                    to={`/agendamento?servico=${id}`} 
+                    className="mt-auto px-4 py-2 bg-accent-dark text-white rounded-full hover:bg-accent-light hover:text-text-dark transition shadow-sm font-medium text-sm"
                   >
                     Agendar
                   </Link>
@@ -120,7 +136,7 @@ function HomePage() {
             <div className="flex justify-center mt-12">
               <Link
                 to="/servicos"
-                className="px-8 py-3 bg-accent-dark text-white font-semibold rounded-full hover:bg-accent-light hover:text-text-dark transition duration-300"
+                className="px-8 py-3 bg-accent-dark text-white font-semibold rounded-full hover:bg-accent-light hover:text-text-dark transition duration-300 shadow-md hover:shadow-lg"
               >
                 Ver Todos os Serviços
               </Link>
