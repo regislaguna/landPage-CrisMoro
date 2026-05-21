@@ -57,21 +57,26 @@ function Agendamentos() {
     setSuccess(false);
 
     try {
-      // ✅ Endpoint corrigido para plural e payload compatível
-      await api.post('/agendamentos', {
-        serviceId: formData.serviceId,
-        date: formData.date,
-        time: formData.time,
-        name: formData.name,
-        phone: formData.phone,
-        email: formData.email,
-        notes: formData.notes
-      });
+      // ✅ BLINDAGEM DO PAYLOAD: Conversão estrita de tipos para o PostgreSQL
+      const payload = {
+        serviceId: parseInt(formData.serviceId, 10), // Garante que o ID vá como número inteiro puro
+        date: formData.date.trim(),
+        time: formData.time.trim(),
+        name: formData.name.trim(),
+        phone: formData.phone.trim(),
+        email: formData.email.trim(),
+        notes: formData.notes ? formData.notes.trim() : ''
+      };
+
+      await api.post('/agendamentos', payload);
+      
       setIsLoading(false);
       setSuccess(true);
       setFormData({ serviceId: '', date: '', time: '', name: '', phone: '', email: '', notes: '' });
     } catch (err) {
       setIsLoading(false);
+      // Captura o erro real detalhado do backend e joga no console para debug cirúrgico
+      console.error("Erro retornado pelo servidor no agendamento:", err.response?.data || err.message);
       setError('Erro ao agendar. Tente novamente.');
     }
   };
@@ -121,7 +126,7 @@ function Agendamentos() {
           <div className="mb-4">
             <label htmlFor="serviceId" className="block text-sm font-medium text-text-dark mb-1">Serviço *</label>
             {loadingServicos ? (
-              <p>Carregando serviços...</p>
+              <p className="text-gray-500 text-sm">Carregando tratamentos disponíveis...</p>
             ) : (
               <select
                 id="serviceId"
@@ -142,8 +147,8 @@ function Agendamentos() {
           </div>
 
           {/* Feedback */}
-          {error && <p className="text-red-600 mb-4">{error}</p>}
-          {success && <p className="text-green-600 mb-4">Agendamento realizado com sucesso!</p>}
+          {error && <p className="text-red-600 mb-4 font-medium" role="alert">{error}</p>}
+          {success && <p className="text-green-600 mb-4 font-medium" role="alert">Agendamento realizado com sucesso!</p>}
 
           {/* Botão */}
           <button
