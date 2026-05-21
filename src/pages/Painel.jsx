@@ -54,7 +54,6 @@ function Painel() {
   // ==========================================
   const irParaProntuario = (nome) => {
     if (!nome) return;
-    // Navega para a página de prontuários levando o nome na "mala diplomática" (state)
     navigate('/prontuarios', { state: { termoBusca: nome } });
   };
 
@@ -104,7 +103,6 @@ function Painel() {
     } catch (err) { alert("Falha ao excluir o serviço."); }
   };
 
-  // ✅ ADEQUAÇÃO: Filtros atualizados para ler as variáveis em português vindas da API
   const agendamentosFiltrados = useMemo(() => {
     const lista = Array.isArray(agendamentos) ? agendamentos : [];
     if (!buscaGeral) return lista;
@@ -168,7 +166,6 @@ function Painel() {
     } catch (err) { alert('Falha ao tentar gerar o relatório individual.'); }
   };
 
-  // ✅ ADEQUAÇÃO: Mapeamento do Excel de Agendamentos corrigido para variáveis em português
   const exportarAgendamentosExcel = () => {
     const dadosParaExcel = agendamentosFiltrados.map(ag => ({
       "Data": ag.data ? new Date(ag.data).toLocaleDateString('pt-BR') : 'N/A', 
@@ -306,9 +303,10 @@ function Painel() {
                 <tbody className="divide-y">
                   {loadingAgendamentos ? (
                     <tr><td colSpan="4" className="py-4 text-center text-gray-500 text-xs">Carregando agendamentos...</td></tr>
+                  ) : agendamentosFiltrados.length === 0 ? (
+                    <tr><td colSpan="4" className="py-4 text-center text-gray-400 text-xs">Nenhum agendamento encontrado.</td></tr>
                   ) : agendamentosFiltrados.map(ag => (
                     <tr key={ag.id} className="hover:bg-gray-50">
-                      {/* ✅ ADEQUAÇÃO: Renderização corrigida para as variáveis em português vindas do Postgres */}
                       <td className="py-3">{ag.data ? new Date(ag.data).toLocaleDateString('pt-BR') : 'N/A'}</td>
                       <td>{ag.horario}</td>
                       <td 
@@ -346,8 +344,11 @@ function Painel() {
                   </tr>
                 </thead>
                 <tbody className="divide-y">
+                  {/* ✅ BLINDAGEM COMPLETA DA TABELA DE QUESTIONÁRIOS */}
                   {loadingQuestionarios ? (
                     <tr><td colSpan="4" className="py-4 text-center text-gray-500 text-xs">Carregando questionários...</td></tr>
+                  ) : questionariosFiltrados.length === 0 ? (
+                    <tr><td colSpan="4" className="py-4 text-center text-gray-400 text-xs">Nenhum questionário encontrado.</td></tr>
                   ) : questionariosFiltrados.map(q => (
                     <tr key={q.id} className="hover:bg-gray-50">
                       <td className="py-3">{q.createdAt ? new Date(q.createdAt).toLocaleDateString('pt-BR') : 'Sem Data'}</td>
@@ -358,7 +359,9 @@ function Painel() {
                       >
                         {q.nome}
                       </td>
-                      <td className="truncate max-w-xs">{q.motivo_consulta}</td>
+                      <td className="truncate max-w-xs py-3 text-gray-600" title={q.motivo_consulta}>
+                        {q.motivo_consulta || 'Não informado'}
+                      </td>
                       <td>{q.telefone}</td>
                     </tr>
                   ))}
