@@ -104,18 +104,28 @@ function Painel() {
     } catch (err) { alert("Falha ao excluir o serviço."); }
   };
 
+  // ✅ ADEQUAÇÃO: Filtros atualizados para ler as variáveis em português vindas da API
   const agendamentosFiltrados = useMemo(() => {
     const lista = Array.isArray(agendamentos) ? agendamentos : [];
     if (!buscaGeral) return lista;
     const termo = buscaGeral.toLowerCase();
-    return lista.filter(ag => (ag.name && ag.name.toLowerCase().includes(termo)) || (ag.email && ag.email.toLowerCase().includes(termo)) || (ag.phone && ag.phone.toLowerCase().includes(termo)));
+    return lista.filter(ag => 
+      (ag.nome_cliente && ag.nome_cliente.toLowerCase().includes(termo)) || 
+      (ag.email_cliente && ag.email_cliente.toLowerCase().includes(termo)) || 
+      (ag.telefone_cliente && ag.telefone_cliente.toLowerCase().includes(termo))
+    );
   }, [agendamentos, buscaGeral]);
 
   const questionariosFiltrados = useMemo(() => {
     const lista = Array.isArray(questionarios) ? questionarios : [];
     if (!buscaGeral) return lista;
     const termo = buscaGeral.toLowerCase();
-    return lista.filter(q => (q.nome && q.nome.toLowerCase().includes(termo)) || (q.email && q.email.toLowerCase().includes(termo)) || (q.telefone && q.telefone.toLowerCase().includes(termo)) || (q.motivo_consulta && q.motivo_consulta.toLowerCase().includes(termo)));
+    return lista.filter(q => 
+      (q.nome && q.nome.toLowerCase().includes(termo)) || 
+      (q.email && q.email.toLowerCase().includes(termo)) || 
+      (q.telefone && q.telefone.toLowerCase().includes(termo)) || 
+      (q.motivo_consulta && q.motivo_consulta.toLowerCase().includes(termo))
+    );
   }, [questionarios, buscaGeral]);
 
   // ==========================================
@@ -123,7 +133,11 @@ function Painel() {
   // ==========================================
   const exportarQuestionariosExcel = () => {
     const dadosParaExcel = questionariosFiltrados.map(q => ({
-      "Data": q.createdAt ? new Date(q.createdAt).toLocaleDateString() : 'N/A', "Nome": q.nome || 'N/A', "Email": q.email || 'N/A', "Telefone": q.telefone || 'N/A', "Motivo da Consulta": q.motivo_consulta || 'N/A'
+      "Data": q.createdAt ? new Date(q.createdAt).toLocaleDateString('pt-BR') : 'N/A', 
+      "Nome": q.nome || 'N/A', 
+      "Email": q.email || 'N/A', 
+      "Telefone": q.telefone || 'N/A', 
+      "Motivo da Consulta": q.motivo_consulta || 'N/A'
     }));
     if (dadosParaExcel.length === 0) return alert("Não há dados para exportar.");
     const planilha = XLSX.utils.json_to_sheet(dadosParaExcel);
@@ -154,9 +168,13 @@ function Painel() {
     } catch (err) { alert('Falha ao tentar gerar o relatório individual.'); }
   };
 
+  // ✅ ADEQUAÇÃO: Mapeamento do Excel de Agendamentos corrigido para variáveis em português
   const exportarAgendamentosExcel = () => {
     const dadosParaExcel = agendamentosFiltrados.map(ag => ({
-      "Data": ag.date ? new Date(ag.date).toLocaleDateString() : 'N/A', "Hora": ag.time || 'N/A', "Nome": ag.name || 'N/A', "Telefone": ag.phone || 'N/A',
+      "Data": ag.data ? new Date(ag.data).toLocaleDateString('pt-BR') : 'N/A', 
+      "Hora": ag.horario || 'N/A', 
+      "Nome": ag.nome_cliente || 'N/A', 
+      "Telefone": ag.telefone_cliente || 'N/A',
     }));
     if (dadosParaExcel.length === 0) return alert("Não há dados para exportar.");
     const planilha = XLSX.utils.json_to_sheet(dadosParaExcel);
@@ -236,7 +254,7 @@ function Painel() {
                   <tbody className="divide-y divide-gray-100">
                     {loadingServicos ? <tr><td colSpan="3" className="py-4 text-center text-gray-500 text-xs">Carregando...</td></tr> : servicos.map(s => (
                       <tr key={s.id} className="hover:bg-gray-50 transition">
-                        <td className="py-3 text-gray-700">{s.title || s.nome}</td>
+                        <td className="py-3 text-gray-700">{s.nome || s.title}</td>
                         <td className="py-3 text-gray-600">R$ {Number(s.price).toFixed(2)}</td>
                         <td className="py-3 text-right">
                           <button onClick={() => handleDeleteServico(s.id)} className="text-red-400 hover:text-red-600 text-xs">Excluir</button>
@@ -286,18 +304,21 @@ function Painel() {
                   </tr>
                 </thead>
                 <tbody className="divide-y">
-                  {agendamentosFiltrados.map(ag => (
+                  {loadingAgendamentos ? (
+                    <tr><td colSpan="4" className="py-4 text-center text-gray-500 text-xs">Carregando agendamentos...</td></tr>
+                  ) : agendamentosFiltrados.map(ag => (
                     <tr key={ag.id} className="hover:bg-gray-50">
-                      <td className="py-3">{ag.date ? new Date(ag.date).toLocaleDateString() : 'N/A'}</td>
-                      <td>{ag.time}</td>
+                      {/* ✅ ADEQUAÇÃO: Renderização corrigida para as variáveis em português vindas do Postgres */}
+                      <td className="py-3">{ag.data ? new Date(ag.data).toLocaleDateString('pt-BR') : 'N/A'}</td>
+                      <td>{ag.horario}</td>
                       <td 
                         className="font-medium text-indigo-600 hover:text-indigo-800 cursor-pointer underline decoration-indigo-300 underline-offset-2 transition" 
-                        onClick={() => irParaProntuario(ag.name)}
+                        onClick={() => irParaProntuario(ag.nome_cliente)}
                         title="Abrir prontuário deste paciente"
                       >
-                        {ag.name}
+                        {ag.nome_cliente}
                       </td>
-                      <td>{ag.phone}</td>
+                      <td>{ag.telefone_cliente}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -325,9 +346,11 @@ function Painel() {
                   </tr>
                 </thead>
                 <tbody className="divide-y">
-                  {questionariosFiltrados.map(q => (
+                  {loadingQuestionarios ? (
+                    <tr><td colSpan="4" className="py-4 text-center text-gray-500 text-xs">Carregando questionários...</td></tr>
+                  ) : questionariosFiltrados.map(q => (
                     <tr key={q.id} className="hover:bg-gray-50">
-                      <td className="py-3">{q.createdAt ? new Date(q.createdAt).toLocaleDateString() : 'Sem Data'}</td>
+                      <td className="py-3">{q.createdAt ? new Date(q.createdAt).toLocaleDateString('pt-BR') : 'Sem Data'}</td>
                       <td 
                         className="font-medium text-indigo-600 hover:text-indigo-800 cursor-pointer underline decoration-indigo-300 underline-offset-2 transition" 
                         onClick={() => irParaProntuario(q.nome)}
